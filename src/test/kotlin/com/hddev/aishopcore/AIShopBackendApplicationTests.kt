@@ -1,10 +1,10 @@
-package com.hddev.apshopbackend
+package com.hddev.aishopcore
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class ApshopBackendApplicationTests {
+class AIShopBackendApplicationTests {
 
 	@Test
 	fun contextLoads() {

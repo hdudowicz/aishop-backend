@@ -1,11 +1,11 @@
-package com.hddev.apshopbackend
+package com.hddev.aishopcore
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class ApshopBackendApplication
+class AIShopCoreApplication
 
 fun main(args: Array<String>) {
-	runApplication<ApshopBackendApplication>(*args)
+	runApplication<AIShopCoreApplication>(*args)
 }

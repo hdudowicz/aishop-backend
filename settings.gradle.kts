@@ -1,1 +1,1 @@
-rootProject.name = "apshop-backend"
+rootProject.name = "aishop-backend"
