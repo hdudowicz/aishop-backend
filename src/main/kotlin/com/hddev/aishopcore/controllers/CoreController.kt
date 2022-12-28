@@ -4,10 +4,7 @@ import com.hddev.aishopcore.model.InputDTO
 import com.hddev.aishopcore.model.PredictionRequestDTO
 import com.hddev.aishopcore.model.PredictionStatusDTO
 import org.springframework.http.*
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
 import java.lang.NullPointerException
 import java.util.*
@@ -34,19 +31,13 @@ class CoreController {
 //            output = arrayListOf("https://replicate.delivery/pbxt/jXV2JKLaovbmGBVtbrmSBHvh2CIadqaf6fmR3XXizV9233MQA/out-0.png")
 //        }
 //    }
-
+    // TODO: Find why auth token is not being passed
     @PostMapping(path = ["/generate"])
-    fun getGenStatus(@RequestParam(value = "prompt") prompt: String?): PredictionStatusDTO {
+    fun getGenStatus(@RequestBody() prompt: InputDTO?): PredictionStatusDTO {
 //        if (prompt == null) throw RequestException
         val restTemplate = RestTemplate()
 
-        val headers = HttpHeaders()
-        headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-        headers.add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36")
-        headers.add("Authorization", "Token $REPLICATE_API_TOKEN")
-        headers.add("Content-Type", "application/json")
-
-        val entity: HttpEntity<PredictionRequestDTO> = HttpEntity(PredictionRequestDTO(VERSION, InputDTO("")), headers)
+        val entity: HttpEntity<PredictionRequestDTO> = HttpEntity(PredictionRequestDTO(VERSION, prompt), generateHeaders())
         val result: ResponseEntity<PredictionStatusDTO> = restTemplate.exchange(REPLICATE_URL, HttpMethod.POST, entity, PredictionStatusDTO::class.java)
         return result.body as PredictionStatusDTO
     }
@@ -59,6 +50,13 @@ class CoreController {
         val result: ResponseEntity<PredictionStatusDTO> = restTemplate.exchange("$REPLICATE_URL/$id", HttpMethod.GET, entity, PredictionStatusDTO::class.java)
         return result.body as PredictionStatusDTO
     }
+
+//    @PostMapping("/create-product")
+//    fun createProduct(@RequestParam(value = "id") id: String): ResponseEntity<*> {
+//        val restTemplate = RestTemplate()
+//
+//        val entity
+//    }
 
     companion object {
         const val VERSION = "e5e1fd333a08c8035974a01dd42f799f1cca4625aec374643d716d9ae40cf2e4"
