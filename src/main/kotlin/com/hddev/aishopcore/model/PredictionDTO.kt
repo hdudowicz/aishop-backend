@@ -4,7 +4,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-data class PredictionStatusDTO(
+data class PredictionDTO(
     var id: String? = null,
     var version: String? = null,
     var urls: Urls? = null,
