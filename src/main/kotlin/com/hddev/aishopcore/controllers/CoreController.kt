@@ -1,5 +1,6 @@
 package com.hddev.aishopcore.controllers
 
+import com.hddev.aishopcore.model.Input
 import com.hddev.aishopcore.model.InputDTO
 import com.hddev.aishopcore.model.PredictionRequestDTO
 import com.hddev.aishopcore.model.PredictionStatusDTO
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
 import java.lang.NullPointerException
 import java.util.*
+import kotlin.random.Random
 
 
 @RestController
@@ -37,18 +39,29 @@ class CoreController {
 //        if (prompt == null) throw RequestException
         val restTemplate = RestTemplate()
 
-        val entity: HttpEntity<PredictionRequestDTO> = HttpEntity(PredictionRequestDTO(VERSION, prompt), generateHeaders())
-        val result: ResponseEntity<PredictionStatusDTO> = restTemplate.exchange(REPLICATE_URL, HttpMethod.POST, entity, PredictionStatusDTO::class.java)
-        return result.body as PredictionStatusDTO
+//        val entity: HttpEntity<PredictionRequestDTO> = HttpEntity(PredictionRequestDTO(VERSION, prompt), generateHeaders())
+//        val result: ResponseEntity<PredictionStatusDTO> = restTemplate.exchange(REPLICATE_URL, HttpMethod.POST, entity, PredictionStatusDTO::class.java)
+//        return result.body as PredictionStatusDTO
+        return PredictionStatusDTO().apply {
+            id = "1234"
+            input = Input(prompt?.text)
+        }
     }
 
     @GetMapping("/status")
     fun getPredictionStatus(@RequestParam(value = "id") id: String): PredictionStatusDTO {
         val restTemplate = RestTemplate()
 
-        val entity: HttpEntity<PredictionRequestDTO> = HttpEntity(PredictionRequestDTO(VERSION, InputDTO("")), generateHeaders())
-        val result: ResponseEntity<PredictionStatusDTO> = restTemplate.exchange("$REPLICATE_URL/$id", HttpMethod.GET, entity, PredictionStatusDTO::class.java)
-        return result.body as PredictionStatusDTO
+//        val entity: HttpEntity<PredictionRequestDTO> = HttpEntity(PredictionRequestDTO(VERSION, InputDTO("")), generateHeaders())
+//        val result: ResponseEntity<PredictionStatusDTO> = restTemplate.exchange("$REPLICATE_URL/$id", HttpMethod.GET, entity, PredictionStatusDTO::class.java)
+//        return result.body as PredictionStatusDTO
+        return PredictionStatusDTO().apply {
+            this.id = id
+            input = Input(id)
+            output = if (Random.nextInt(0, 10) > 7) arrayListOf(
+                "https://assets.newatlas.com/dims4/default/06c4449/2147483647/strip/true/crop/800x533+0+33/resize/1200x800!/quality/90/?url=http:%2F%2Fnewatlas-brightspot.s3.amazonaws.com%2Farchive%2F2016-year-in-ai-art-2.jpg"
+            ) else null
+        }
     }
 
 //    @PostMapping("/create-product")
