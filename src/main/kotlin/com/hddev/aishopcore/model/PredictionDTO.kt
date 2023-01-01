@@ -1,5 +1,6 @@
 package com.hddev.aishopcore.model
 
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -8,9 +9,9 @@ data class PredictionDTO(
     var id: String? = null,
     var version: String? = null,
     var urls: Urls? = null,
-    var created_at: Date? = null,
-    var started_at: Date? = null,
-    var completed_at: Date? = null,
+    var created_at: LocalDateTime? = null,
+    var started_at: LocalDateTime? = null,
+    var completed_at: LocalDateTime? = null,
     var source: String? = null,
     var status: String? = null,
     var input: Input? = null,

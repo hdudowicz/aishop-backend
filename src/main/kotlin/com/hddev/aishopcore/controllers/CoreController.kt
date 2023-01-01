@@ -1,8 +1,12 @@
 package com.hddev.aishopcore.controllers
 
+import com.hddev.aishopcore.entities.PredictionEntity
+import com.hddev.aishopcore.extensions.toEntity
 import com.hddev.aishopcore.model.Input
 import com.hddev.aishopcore.model.InputDTO
 import com.hddev.aishopcore.model.PredictionDTO
+import com.hddev.aishopcore.model.PredictionsDTO
+import com.hddev.aishopcore.repository.PredictionRepository
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
@@ -10,7 +14,9 @@ import java.util.*
 
 
 @RestController
-class CoreController {
+class CoreController(
+    private val predictionRepo: PredictionRepository
+) {
 //    @GetMapping("/status")
 //    fun getStatus(@RequestParam(value = "id", defaultValue = "123") id: String): PredictionStatusDTO {
 //
@@ -32,17 +38,21 @@ class CoreController {
 //    }
     // TODO: Find why auth token is not being passed
     @PostMapping(path = ["/generate"])
-    fun getGenStatus(@RequestBody() prompt: InputDTO?): PredictionDTO {
+    fun generatePrediction(@RequestBody() prompt: InputDTO?): PredictionDTO {
 //        if (prompt == null) throw RequestException
         val restTemplate = RestTemplate()
 
 //        val entity: HttpEntity<PredictionRequestDTO> = HttpEntity(PredictionRequestDTO(VERSION, prompt), generateHeaders())
 //        val result: ResponseEntity<PredictionStatusDTO> = restTemplate.exchange(REPLICATE_URL, HttpMethod.POST, entity, PredictionStatusDTO::class.java)
 //        return result.body as PredictionStatusDTO
-        return PredictionDTO().apply {
+        val prediction = PredictionDTO().apply {
             id = "1234"
             input = Input(prompt?.text)
         }
+
+        // Save prediction to database and return prediction
+        predictionRepo.save(prediction.toEntity())
+        return prediction
     }
 
     @GetMapping("/status")
@@ -60,6 +70,11 @@ class CoreController {
                 "https://assets.newatlas.com/dims4/default/06c4449/2147483647/strip/true/crop/800x533+0+33/resize/1200x800!/quality/90/?url=http:%2F%2Fnewatlas-brightspot.s3.amazonaws.com%2Farchive%2F2016-year-in-ai-art-2.jpg"
             )
         }
+    }
+
+    @GetMapping("/predictions")
+    fun getMyPredictions(): PredictionsDTO {
+        return PredictionsDTO(predictionRepo.findAll())
     }
 
 //    @PostMapping("/create-product")
