@@ -11,31 +11,14 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
 import java.util.*
+import kotlin.random.Random
 
 
 @RestController
 class CoreController(
     private val predictionRepo: PredictionRepository
 ) {
-//    @GetMapping("/status")
-//    fun getStatus(@RequestParam(value = "id", defaultValue = "123") id: String): PredictionStatusDTO {
-//
-////        val restTemplate = RestTemplate()
-////        val uri = ""
-////
-////        val headers = HttpHeaders()
-////        headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-////        headers.add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36")
-////        headers.add("Authorization", )
-////
-////        val entity: HttpEntity<PredictionRequestDTO> = HttpEntity(PredictionRequestDTO(VERSION, InputDTO("")), headers)
-////        val result: ResponseEntity<*> = restTemplate.exchange(uri, HttpMethod.GET, entity, PredictionRequestDTO::class.java)
-////        return result.body as PredictionStatusDTO
-//
-//        return PredictionStatusDTO(id, "", null).apply {
-//            output = arrayListOf("https://replicate.delivery/pbxt/jXV2JKLaovbmGBVtbrmSBHvh2CIadqaf6fmR3XXizV9233MQA/out-0.png")
-//        }
-//    }
+
     // TODO: Find why auth token is not being passed
     @PostMapping(path = ["/generate"])
     fun generatePrediction(@RequestBody() prompt: InputDTO?): PredictionDTO {
@@ -46,22 +29,58 @@ class CoreController(
 //        val result: ResponseEntity<PredictionStatusDTO> = restTemplate.exchange(REPLICATE_URL, HttpMethod.POST, entity, PredictionStatusDTO::class.java)
 //        return result.body as PredictionStatusDTO
         val prediction = PredictionDTO().apply {
-            id = "1234"
+            id = Random.nextLong(0, Long.MAX_VALUE).toString()
             input = Input(prompt?.text)
+            output = arrayListOf(
+                "https://picsum.photos/seed/${prompt?.text}/200/300"
+            )
         }
+        try {
+            predictionRepo.save(prediction.toEntity())
+            // Save prediction to database and return prediction
+        } catch (e: IndexOutOfBoundsException) {
 
-        // Save prediction to database and return prediction
-        predictionRepo.save(prediction.toEntity())
+        }
         return prediction
     }
 
+    @GetMapping("/get-image")
+    fun getPredictionImage(@RequestParam(value = "id") id: Long): ResponseEntity<ByteArray> {
+        val prediction = predictionRepo.findById(id.toLong())
+        if (prediction.isPresent) {
+            val image = prediction.get().image
+            if (image != null) {
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.IMAGE_JPEG
+                return ResponseEntity(image, headers, HttpStatus.OK)
+            }
+        }
+        return ResponseEntity(HttpStatus.NOT_FOUND)
+    }
+
     @GetMapping("/status")
+    fun getSinglePredictionStatus(@RequestParam(value = "id") id: String): PredictionEntity {
+        val restTemplate = RestTemplate()
+
+//        val entity: HttpEntity<PredictionRequestDTO> = HttpEntity(PredictionRequestDTO(VERSION, InputDTO("")), generateHeaders())
+//        val result: ResponseEntity<PredictionStatusDTO> = restTemplate.exchange("$REPLICATE_URL/$id", HttpMethod.GET, entity, PredictionStatusDTO::class.java)
+//        return result.body as PredictionStatusDTO
+
+        val prediction = predictionRepo.findPredictionById(id.toLong()) ?: throw Exception("Prediction not found")
+
+        return prediction
+
+    }
+    @GetMapping("/status1")
     fun getPredictionStatus(@RequestParam(value = "id") id: String): PredictionDTO {
         val restTemplate = RestTemplate()
 
 //        val entity: HttpEntity<PredictionRequestDTO> = HttpEntity(PredictionRequestDTO(VERSION, InputDTO("")), generateHeaders())
 //        val result: ResponseEntity<PredictionStatusDTO> = restTemplate.exchange("$REPLICATE_URL/$id", HttpMethod.GET, entity, PredictionStatusDTO::class.java)
 //        return result.body as PredictionStatusDTO
+
+        val prediction = predictionRepo.findPredictionById(id.toLong())
+
         return PredictionDTO().apply {
             this.id = id
             input = Input(id)

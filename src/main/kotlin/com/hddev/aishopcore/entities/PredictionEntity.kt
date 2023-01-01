@@ -12,7 +12,6 @@ import java.time.LocalDateTime
 @Table(name = "predictions")
 open class PredictionEntity() {
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
     //    var version: String? = null,
@@ -21,14 +20,17 @@ open class PredictionEntity() {
     var completedAt: LocalDateTime? = null
     var status: GenerationStatus? = null
     var prompt: String? = null
-    @Lob
-    @Column(name = "image", columnDefinition = "BLOB")
+    @Lob()
+    @Column(name = "image", columnDefinition = "LONGBLOB")
     var image: ByteArray? = null
     var predictTime: Double? = null
     var replicateSlug: String? = null
 
+
+    var userId: Long? = null
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "userId", insertable=false, updatable=false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private var user: User? = null

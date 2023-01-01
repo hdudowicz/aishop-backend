@@ -11,14 +11,14 @@ import kotlin.random.Random
 class DBOperationRunner constructor(val predictionRepo: PredictionRepository): CommandLineRunner {
 
     override fun run(vararg args: String?) {
-        predictionRepo.saveAll(
-            listOf(
-                PredictionEntity(
-                    id = Random.nextLong(),
-                    status = GenerationStatus.starting,
-
-                )
-            )
-        )
+//        predictionRepo.saveAll(
+//            listOf(
+//                PredictionEntity(
+//                    id = Random.nextLong(),
+//                    status = GenerationStatus.starting,
+//
+//                )
+//            )
+//        )
     }
 }
