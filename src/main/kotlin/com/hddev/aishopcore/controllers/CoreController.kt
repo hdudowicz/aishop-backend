@@ -1,12 +1,13 @@
 package com.hddev.aishopcore.controllers
 
-import com.hddev.aishopcore.entities.PredictionEntity
+import com.hddev.aishopcore.entities.Prediction
 import com.hddev.aishopcore.extensions.toEntity
 import com.hddev.aishopcore.model.Input
 import com.hddev.aishopcore.model.InputDTO
 import com.hddev.aishopcore.model.PredictionDTO
 import com.hddev.aishopcore.model.PredictionsDTO
 import com.hddev.aishopcore.repository.PredictionRepository
+import org.slf4j.LoggerFactory
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
@@ -18,6 +19,7 @@ import kotlin.random.Random
 class CoreController(
     private val predictionRepo: PredictionRepository
 ) {
+    val log = LoggerFactory.getLogger(CoreController::class.java)
 
     // TODO: Find why auth token is not being passed
     @PostMapping(path = ["/generate"])
@@ -32,11 +34,14 @@ class CoreController(
             id = Random.nextLong(0, Long.MAX_VALUE).toString()
             input = Input(prompt?.text)
             output = arrayListOf(
-                "https://picsum.photos/seed/${prompt?.text}/200/300"
+                "https://source.unsplash.com/1600x900/?${prompt?.text}"
             )
         }
+        log.info("Generated prediction: $prediction")
+        predictionRepo.save(prediction.toEntity())
+        log.info("Saved prediction: $prediction")
+
         try {
-            predictionRepo.save(prediction.toEntity())
             // Save prediction to database and return prediction
         } catch (e: IndexOutOfBoundsException) {
 
@@ -59,14 +64,15 @@ class CoreController(
     }
 
     @GetMapping("/status")
-    fun getSinglePredictionStatus(@RequestParam(value = "id") id: String): PredictionEntity {
+    fun getSinglePredictionStatus(@RequestParam(value = "id") id: String): Prediction {
         val restTemplate = RestTemplate()
 
 //        val entity: HttpEntity<PredictionRequestDTO> = HttpEntity(PredictionRequestDTO(VERSION, InputDTO("")), generateHeaders())
 //        val result: ResponseEntity<PredictionStatusDTO> = restTemplate.exchange("$REPLICATE_URL/$id", HttpMethod.GET, entity, PredictionStatusDTO::class.java)
 //        return result.body as PredictionStatusDTO
 
-        val prediction = predictionRepo.findPredictionById(id.toLong()) ?: throw Exception("Prediction not found")
+//        val prediction = predictionRepo.findPredictionById(id.toLong()) ?: throw Exception("Prediction not found")
+        val prediction = predictionRepo.findPredictionByReplicateSlug(id) ?: throw Exception("Prediction not found")
 
         return prediction
 

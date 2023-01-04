@@ -14,5 +14,5 @@ open class User {
     var token: String? = null
 
     @OneToMany
-    var predictions: ArrayList<PredictionEntity> = arrayListOf()
+    var predictions: ArrayList<Prediction> = arrayListOf()
 }
